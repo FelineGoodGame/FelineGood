@@ -17,11 +17,14 @@ class NORANEKO_API APatroller : public ACharacter
 
 		APatroller(const FObjectInitializer& ObjectInitializer);
 
-		UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Patrol)
+		UPROPERTY(EditAnywhere, Category =Behavior)
+		class UBehaviorTree* PatrollerBehavior;
+
+	/*	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Patrol)
 			TArray<float> WayPoints;
 		UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Patrol)
 			float Speed;
 		UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Patrol)
-			UStaticMeshComponent* MeshPatroller;
+			UStaticMeshComponent* MeshPatroller;*/
 	
 };
