@@ -8,8 +8,10 @@
 APatroller::APatroller(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
-	/*MeshPatroller = ObjectInitializer.CreateDefaultSubobject<UStaticMeshComponent>(this, TEXT("PatrollerMesh"));
+	MeshPatroller = ObjectInitializer.CreateDefaultSubobject<UStaticMeshComponent>(this, TEXT("PatrollerMesh"));
 	MeshPatroller->SetSimulatePhysics(true);
-	MeshPatroller->AttachTo(RootComponent);*/
+	MeshPatroller->AttachTo(RootComponent);
 	AIControllerClass = APatroller_Controller::StaticClass();
+
+	GetCharacterMovement()->MaxWalkSpeed = 3000.0f;
 }

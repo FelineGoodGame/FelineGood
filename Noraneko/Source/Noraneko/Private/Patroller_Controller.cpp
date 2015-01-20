@@ -6,7 +6,7 @@
 #include "NoranekoCharacter.h"
 
 APatroller_Controller::APatroller_Controller(const FObjectInitializer& ObjectInitializer)
-	: Super(ObjectInitializer)
+	: Super(ObjectInitializer), Index{0}
 {
 	BlackboardComp = ObjectInitializer.CreateDefaultSubobject<UBlackboardComponent>(this, TEXT("BlackBoardComp"));
 	BehaviorTreeComp = ObjectInitializer.CreateDefaultSubobject <  UBehaviorTreeComponent >(this, TEXT("BehaviorComp"));
@@ -24,6 +24,7 @@ void  APatroller_Controller::Possess(class APawn* InPawn)
 		BlackboardComp->InitializeBlackboard(Patroller->PatrollerBehavior->BlackboardAsset);
 		EnemyKeyID = BlackboardComp->GetKeyID("Enemy");
 		EnemyLocationID = BlackboardComp->GetKeyID("Destination");
+		TargetLocationID = BlackboardComp->GetKeyID("Destination");
 
 		BehaviorTreeComp->StartTree(*(Patroller->PatrollerBehavior));
 	}
@@ -32,10 +33,9 @@ void  APatroller_Controller::Possess(class APawn* InPawn)
 
 void APatroller_Controller::SearchForEnemy()
 {
-	APawn* MyPatroller = GetPawn();
+	auto MyPatroller = GetPawn();
 	if (MyPatroller == NULL)
 	{
-		FMessageDialog::Open(EAppMsgType::Ok, FText::FromString(TEXT("Dialog message")));
 
 		return;
 	}
@@ -46,7 +46,7 @@ void APatroller_Controller::SearchForEnemy()
 
 	for (FConstPawnIterator It = GetWorld()->GetPawnIterator(); It; ++It)
 	{
-		ANoranekoCharacter* TestPawn = Cast<ANoranekoCharacter>(*It);
+		auto TestPawn = Cast<ANoranekoCharacter>(*It);
 		if (TestPawn)
 		{
 			const float DistSq = FVector::Dist(TestPawn->GetActorLocation(), MyLoc);
@@ -67,4 +67,24 @@ void APatroller_Controller::SetEnemy(class APawn *InPawn)
 {
 	BlackboardComp->SetValueAsObject(EnemyKeyID, InPawn);
 	BlackboardComp->SetValueAsVector(EnemyLocationID, InPawn->GetActorLocation());
+}
+
+void APatroller_Controller::GetNextLocation()
+{
+	auto MyPawn = GetPawn();
+	if (MyPawn == NULL)
+	{
+		return;
+	}
+
+	auto MyPatroller = Cast<APatroller>(MyPawn);
+	if (MyPatroller)
+	{
+		auto& NodeList = MyPatroller->WayPoints;
+		auto Nb =  NodeList.Num();
+		Index = (Index + 1) % Nb;
+
+		//get random location from the list
+		BlackboardComp->SetValueAsVector(TargetLocationID, NodeList[Index]->GetActorLocation());
+	}
 }
