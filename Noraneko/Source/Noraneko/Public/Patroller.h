@@ -4,6 +4,7 @@
 
 #include "GameFramework/Character.h"
 #include "Engine/TargetPoint.h"
+#include "Classes/Perception/PawnSensingComponent.h"
 #include "Patroller.generated.h"
 
 /**
@@ -17,6 +18,12 @@ class NORANEKO_API APatroller : public ACharacter
 	public:
 		/** Patroller constructor*/
 		APatroller(const FObjectInitializer& ObjectInitializer);
+
+		virtual void APatroller::PostInitializeComponents();
+
+		/**Component that allow Patroller see and hear the player*/
+		UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Awareness)
+			UPawnSensingComponent* PatrollerSensor;
 
 		/** Behavior Tree that runs the patroller behavior*/
 		UPROPERTY(EditAnywhere, Category =Behavior)
@@ -33,5 +40,11 @@ class NORANEKO_API APatroller : public ACharacter
 		/** Static mesh of the patroller*/
 		UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Patrol)
 			UStaticMeshComponent* MeshPatroller;
+
+		UFUNCTION()
+			void OnHearNoise(APawn *OtherActor, const FVector &Location, float Volume);
+
+		UFUNCTION()
+			void OnSeePawn(APawn *OtherPawn);
 	
 };
