@@ -3,14 +3,16 @@
 #include "Noraneko.h"
 #include "Patroller_Controller.h"
 #include "Patroller.h"
-#include "NoranekoCharacter.h"
 
 APatroller_Controller::APatroller_Controller(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer), Index{0}
 {
 	BlackboardComp = ObjectInitializer.CreateDefaultSubobject<UBlackboardComponent>(this, TEXT("BlackBoardComp"));
 	BehaviorTreeComp = ObjectInitializer.CreateDefaultSubobject <  UBehaviorTreeComponent >(this, TEXT("BehaviorComp"));
-
+	PatrollerSensor = ObjectInitializer.CreateDefaultSubobject<UPawnSensingComponent>(this, TEXT("Pawn Sensor"));
+	PatrollerSensor->SensingInterval = .25f; // 4 times per second
+	PatrollerSensor->bOnlySensePlayers = false;
+	PatrollerSensor->SetPeripheralVisionAngle(85.f);
 }
 
 void  APatroller_Controller::Possess(class APawn* InPawn)
@@ -87,4 +89,29 @@ void APatroller_Controller::GetNextLocation()
 		//get random location from the list
 		BlackboardComp->SetValueAsVector(TargetLocationID, NodeList[Index]->GetActorLocation());
 	}
+}
+
+void APatroller_Controller::OnHearNoise(APawn *OtherActor, const FVector &Location, float Volume)
+{
+	const FString VolumeDesc = FString::Printf(TEXT(" at volume %f"), Volume);
+	FString message = TEXT("Heard Actor ") + OtherActor->GetName() + VolumeDesc;
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, message);
+}
+
+void APatroller_Controller::OnSeePawn(APawn* OtherPawn)
+{
+	auto Player = Cast<ANoranekoCharacter>(OtherPawn);
+	if (Player)
+	{
+		FString message = TEXT("Saw Actor ") + OtherPawn->GetName();
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, message);
+	}
+
+}
+
+void APatroller_Controller::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+	PatrollerSensor->OnSeePawn.AddDynamic(this, &APatroller_Controller::OnSeePawn);
+	PatrollerSensor->OnHearNoise.AddDynamic(this, &APatroller_Controller::OnHearNoise);
 }

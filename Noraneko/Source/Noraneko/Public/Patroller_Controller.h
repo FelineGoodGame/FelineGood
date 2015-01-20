@@ -6,6 +6,8 @@
 #include "BehaviorTree/BlackboardComponent.h"
 #include "BehaviorTree/BehaviorTreeComponent.h"
 #include "BehaviorTree/BehaviorTree.h"
+#include "NoranekoCharacter.h"
+#include "Classes/Perception/PawnSensingComponent.h"
 #include "Patroller_Controller.generated.h"
 
 /**
@@ -27,6 +29,12 @@ public:
 	/**constructor of the patroller controller*/
 	APatroller_Controller(const FObjectInitializer& ObjectInitializer);
 	
+	virtual void PostInitializeComponents();
+	
+	/**Component that allow Patroller see and hear the player*/
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Awareness)
+		UPawnSensingComponent* PatrollerSensor;
+
 	/** Blackboard that contains all the variables that'll be used in the behavior tree*/
 	UPROPERTY(transient)
 	class UBlackboardComponent* BlackboardComp;
@@ -43,9 +51,15 @@ public:
 
 	/** function that'll be called in the blueprint to seek for ennemy*/
 	UFUNCTION(BlueprintCallable, Category = Behavior)
-		void SearchForEnemy();
+	void SearchForEnemy();
 
 	/** function that'll be called in blueprint to get the next Location to go*/
 	UFUNCTION(BlueprintCallable, Category = Behavior)
 	void GetNextLocation();
+
+	UFUNCTION()
+		void OnHearNoise(APawn *OtherActor, const FVector &Location, float Volume);
+
+	UFUNCTION()
+		void OnSeePawn(APawn *OtherPawn);
 };
