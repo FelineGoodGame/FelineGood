@@ -5,14 +5,16 @@
 #include "Patroller.h"
 
 APatroller_Controller::APatroller_Controller(const FObjectInitializer& ObjectInitializer)
-	: Super(ObjectInitializer), Index{0}
+	: Super(ObjectInitializer), Index{ 0 }, Player{nullptr}
 {
 	BlackboardComp = ObjectInitializer.CreateDefaultSubobject<UBlackboardComponent>(this, TEXT("BlackBoardComp"));
 	BehaviorTreeComp = ObjectInitializer.CreateDefaultSubobject <  UBehaviorTreeComponent >(this, TEXT("BehaviorComp"));
+
 	PatrollerSensor = ObjectInitializer.CreateDefaultSubobject<UPawnSensingComponent>(this, TEXT("Pawn Sensor"));
 	PatrollerSensor->SensingInterval = .25f; // 4 times per second
-	PatrollerSensor->bOnlySensePlayers = false;
-	PatrollerSensor->SetPeripheralVisionAngle(85.f);
+	PatrollerSensor->bOnlySensePlayers = true;
+	PatrollerSensor->SetPeripheralVisionAngle(50.f);
+
 }
 
 void  APatroller_Controller::Possess(class APawn* InPawn)
@@ -22,11 +24,11 @@ void  APatroller_Controller::Possess(class APawn* InPawn)
 
 	if (Patroller && Patroller->PatrollerBehavior)
 	{
-		FMessageDialog::Open(EAppMsgType::Ok, FText::FromString(TEXT("Dialog message")));		
 		BlackboardComp->InitializeBlackboard(Patroller->PatrollerBehavior->BlackboardAsset);
-		EnemyKeyID = BlackboardComp->GetKeyID("Enemy");
-		EnemyLocationID = BlackboardComp->GetKeyID("Destination");
+
+		TargetKeyID = BlackboardComp->GetKeyID("Target");
 		TargetLocationID = BlackboardComp->GetKeyID("Destination");
+		EnemyKeyID = BlackboardComp->GetKeyID("Enemy");
 
 		BehaviorTreeComp->StartTree(*(Patroller->PatrollerBehavior));
 	}
@@ -35,40 +37,20 @@ void  APatroller_Controller::Possess(class APawn* InPawn)
 
 void APatroller_Controller::SearchForEnemy()
 {
-	auto MyPatroller = GetPawn();
-	if (MyPatroller == NULL)
+	if (Player)
 	{
-
-		return;
-	}
-
-	const FVector MyLoc = MyPatroller->GetActorLocation();
-	float BestDistSq = MAX_FLT;
-	ANoranekoCharacter* BestPawn = NULL; 
-
-	for (FConstPawnIterator It = GetWorld()->GetPawnIterator(); It; ++It)
-	{
-		auto TestPawn = Cast<ANoranekoCharacter>(*It);
-		if (TestPawn)
+		if (!PatrollerSensor->HasLineOfSightTo(Player))
 		{
-			const float DistSq = FVector::Dist(TestPawn->GetActorLocation(), MyLoc);
-			if (DistSq < BestDistSq)
-			{
-				BestDistSq = DistSq;
-				BestPawn = TestPawn;
-			}
+			BlackboardComp->SetValueAsObject(EnemyKeyID, NULL);
+			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Enemy lost")));
+			Player = nullptr;
 		}
-	}
-	if (BestPawn)
-	{
-		SetEnemy(BestPawn);
 	}
 }
 
 void APatroller_Controller::SetEnemy(class APawn *InPawn)
 {
-	BlackboardComp->SetValueAsObject(EnemyKeyID, InPawn);
-	BlackboardComp->SetValueAsVector(EnemyLocationID, InPawn->GetActorLocation());
+	BlackboardComp->SetValueAsVector(TargetLocationID, InPawn->GetActorLocation());
 }
 
 void APatroller_Controller::GetNextLocation()
@@ -88,9 +70,11 @@ void APatroller_Controller::GetNextLocation()
 
 		//get random location from the list
 		BlackboardComp->SetValueAsVector(TargetLocationID, NodeList[Index]->GetActorLocation());
+		BlackboardComp->SetValueAsObject(TargetKeyID, NodeList[Index]);
+
 	}
 }
-
+ 
 void APatroller_Controller::OnHearNoise(APawn *OtherActor, const FVector &Location, float Volume)
 {
 	const FString VolumeDesc = FString::Printf(TEXT(" at volume %f"), Volume);
@@ -100,11 +84,15 @@ void APatroller_Controller::OnHearNoise(APawn *OtherActor, const FVector &Locati
 
 void APatroller_Controller::OnSeePawn(APawn* OtherPawn)
 {
-	auto Player = Cast<ANoranekoCharacter>(OtherPawn);
-	if (Player)
+	auto Enemy = Cast<ANoranekoCharacter>(OtherPawn);
+	if (Enemy)
 	{
-		FString message = TEXT("Saw Actor ") + OtherPawn->GetName();
+		Player = Enemy;
+		FString message = TEXT("Saw Actor ") + Enemy->GetName();
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, message);
+		BlackboardComp->SetValueAsVector(TargetLocationID, Enemy->GetActorLocation());
+		BlackboardComp->SetValueAsObject(EnemyKeyID, Enemy);
+
 	}
 
 }

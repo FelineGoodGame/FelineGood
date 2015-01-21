@@ -18,22 +18,22 @@ class NORANEKO_API APatroller_Controller : public AAIController
 {
 	GENERATED_BODY()
 
+protected:
+	/** Variable that use the blackboard*/
+	uint8 TargetKeyID;
+	uint8 TargetLocationID;
+	uint8 EnemyKeyID;
+	ANoranekoCharacter* Player;
 	uint8 Index;
 
-protected:
-	uint8 EnemyKeyID;
-	uint8 EnemyLocationID;
-	uint8 TargetLocationID;
-	
 public:
 	/**constructor of the patroller controller*/
 	APatroller_Controller(const FObjectInitializer& ObjectInitializer);
 	
-	virtual void PostInitializeComponents();
-	
+
 	/**Component that allow Patroller see and hear the player*/
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Awareness)
-		UPawnSensingComponent* PatrollerSensor;
+	UPawnSensingComponent* PatrollerSensor;
 
 	/** Blackboard that contains all the variables that'll be used in the behavior tree*/
 	UPROPERTY(transient)
@@ -43,11 +43,6 @@ public:
 	UPROPERTY(transient)
 	class UBehaviorTreeComponent* BehaviorTreeComp;
 
-	/** Set the controller for the patroller on possessed*/
-	virtual void Possess(class APawn * InPawn);
-
-	/** Set the ennemy to follow*/
-	void SetEnemy(class APawn* InPawn);
 
 	/** function that'll be called in the blueprint to seek for ennemy*/
 	UFUNCTION(BlueprintCallable, Category = Behavior)
@@ -57,9 +52,23 @@ public:
 	UFUNCTION(BlueprintCallable, Category = Behavior)
 	void GetNextLocation();
 
+	/** function to call onHearNoise Event*/
 	UFUNCTION()
-		void OnHearNoise(APawn *OtherActor, const FVector &Location, float Volume);
+	void OnHearNoise(APawn *OtherActor, const FVector &Location, float Volume);
 
+	/** function to call onSeePawn Event*/
 	UFUNCTION()
-		void OnSeePawn(APawn *OtherPawn);
+	void OnSeePawn(APawn *OtherPawn);
+
+
+	/**Register the delegate functions*/
+	virtual void PostInitializeComponents();
+
+	/** Set the controller for the patroller on possess*/
+	virtual void Possess(class APawn * InPawn);
+
+	/** Set the ennemy to follow*/
+	void SetEnemy(class APawn* InPawn);
+
+	
 };
