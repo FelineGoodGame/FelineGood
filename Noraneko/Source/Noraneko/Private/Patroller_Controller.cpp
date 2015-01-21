@@ -12,8 +12,8 @@ APatroller_Controller::APatroller_Controller(const FObjectInitializer& ObjectIni
 
 	PatrollerSensor = ObjectInitializer.CreateDefaultSubobject<UPawnSensingComponent>(this, TEXT("Pawn Sensor"));
 	PatrollerSensor->SensingInterval = .25f; // 4 times per second
-	PatrollerSensor->bOnlySensePlayers = true;
-	PatrollerSensor->SetPeripheralVisionAngle(50.f);
+	PatrollerSensor->bOnlySensePlayers = false;
+	PatrollerSensor->SetPeripheralVisionAngle(45.f);
 
 }
 
@@ -37,6 +37,7 @@ void  APatroller_Controller::Possess(class APawn* InPawn)
 
 void APatroller_Controller::SearchForEnemy()
 {
+
 	if (Player)
 	{
 		if (!PatrollerSensor->HasLineOfSightTo(Player))
@@ -44,6 +45,10 @@ void APatroller_Controller::SearchForEnemy()
 			BlackboardComp->SetValueAsObject(EnemyKeyID, NULL);
 			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Enemy lost")));
 			Player = nullptr;
+		}
+		else{
+			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("I see you")));
+
 		}
 	}
 }
@@ -87,12 +92,11 @@ void APatroller_Controller::OnSeePawn(APawn* OtherPawn)
 	auto Enemy = Cast<ANoranekoCharacter>(OtherPawn);
 	if (Enemy)
 	{
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, FString::Printf(TEXT("I fuckin see you")));
+
 		Player = Enemy;
-		FString message = TEXT("Saw Actor ") + Enemy->GetName();
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, message);
 		BlackboardComp->SetValueAsVector(TargetLocationID, Enemy->GetActorLocation());
 		BlackboardComp->SetValueAsObject(EnemyKeyID, Enemy);
-
 	}
 
 }
