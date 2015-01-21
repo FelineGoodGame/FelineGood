@@ -23,5 +23,4 @@ class NORANEKO_API APatroller : public ACharacter
 			float Speed;
 		UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Patrol)
 			UStaticMeshComponent* MeshPatroller;
-	
 };

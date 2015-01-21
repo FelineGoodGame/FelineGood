@@ -8,6 +8,7 @@ ANoranekoCharacter::ANoranekoCharacter(const FObjectInitializer& ObjectInitializ
 {
 	// Set size for collision capsule
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
+	GetCapsuleComponent()->bGenerateOverlapEvents = true;
 
 	// Don't rotate when the controller rotates.
 	bUseControllerRotationPitch = false;
@@ -21,6 +22,7 @@ ANoranekoCharacter::ANoranekoCharacter(const FObjectInitializer& ObjectInitializ
 	CameraBoom->TargetArmLength = 500.f;
 	CameraBoom->SocketOffset = FVector(0.f,0.f,75.f);
 	CameraBoom->RelativeRotation = FRotator(0.f,180.f,0.f);
+	CameraBoom->bDoCollisionTest = false;
 
 	// Create a camera and attach to boom
 	SideViewCameraComponent = ObjectInitializer.CreateDefaultSubobject<UCameraComponent>(this, TEXT("SideViewCamera"));
@@ -37,8 +39,8 @@ ANoranekoCharacter::ANoranekoCharacter(const FObjectInitializer& ObjectInitializ
 	GetCharacterMovement()->MaxWalkSpeed = 600.f;
 	GetCharacterMovement()->MaxFlySpeed = 600.f;
 
-	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
-	// are set in the derived blueprint asset named MyCharacter (to avoid direct content references in C++)
+	// Setup collisions with patrollers
+	OnActorBeginOverlap.AddDynamic(this, &ANoranekoCharacter::EnterFight);
 }
 
 //////////////////////////////////////////////////////////////////////////
