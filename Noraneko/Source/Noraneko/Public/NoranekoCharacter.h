@@ -35,6 +35,10 @@ protected:
 public:
 	ANoranekoCharacter(const FObjectInitializer& ObjectInitializer);
 
+	/** Event fired when the player collides with an enemy patroller. */
+	UFUNCTION(BlueprintImplementableEvent, Category = "Rembrandt")
+	void EnterFight(AActor* OtherActor);
+
 	/** Returns SideViewCameraComponent subobject **/
 	FORCEINLINE class UCameraComponent* GetSideViewCameraComponent() const { return SideViewCameraComponent; }
 	/** Returns CameraBoom subobject **/

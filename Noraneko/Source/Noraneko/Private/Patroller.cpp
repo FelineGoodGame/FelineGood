@@ -8,12 +8,5 @@
 APatroller::APatroller(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer), bIsSeeing{false}
 {
-	MeshPatroller = ObjectInitializer.CreateDefaultSubobject<UStaticMeshComponent>(this, TEXT("PatrollerMesh"));
-	MeshPatroller->SetSimulatePhysics(true);
-	MeshPatroller->AttachTo(RootComponent);
 	AIControllerClass = APatroller_Controller::StaticClass();
-
-	
-
 }
-
