@@ -40,7 +40,7 @@ ARembrandt::ARembrandt(const FObjectInitializer& ObjectInitializer)
 	GetCharacterMovement()->MaxFlySpeed = 600.f;
 
 	// Setup collisions with patrollers
-	OnActorBeginOverlap.AddDynamic(this, &ARembrandt::TestEvent);
+	
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -55,6 +55,8 @@ void ARembrandt::SetupPlayerInputComponent(class UInputComponent* InputComponent
 
 	InputComponent->BindTouch(IE_Pressed, this, &ARembrandt::TouchStarted);
 	InputComponent->BindTouch(IE_Released, this, &ARembrandt::TouchStopped);
+
+	OnActorBeginOverlap.AddDynamic(this, &ARembrandt::TestEvent);
 }
 
 void ARembrandt::MoveRight(float Value)
