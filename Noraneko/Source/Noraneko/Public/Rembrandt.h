@@ -4,7 +4,7 @@
 #include "Rembrandt.generated.h"
 
 UCLASS(config=Game)
-class ARembrandt : public ACharacter
+class NORANEKO_API ARembrandt : public ACharacter
 {
 	GENERATED_BODY()
 
@@ -37,7 +37,7 @@ public:
 
 	/** Event fired when the player collides with an enemy patroller. */
 	UFUNCTION(BlueprintImplementableEvent, Category = "Rembrandt")
-	void EnterFight(AActor* OtherActor);
+	void TestEvent(AActor* OtherActor);
 
 	/** Returns SideViewCameraComponent subobject **/
 	FORCEINLINE class UCameraComponent* GetSideViewCameraComponent() const { return SideViewCameraComponent; }

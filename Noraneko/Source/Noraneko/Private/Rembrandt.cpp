@@ -40,7 +40,7 @@ ARembrandt::ARembrandt(const FObjectInitializer& ObjectInitializer)
 	GetCharacterMovement()->MaxFlySpeed = 600.f;
 
 	// Setup collisions with patrollers
-	OnActorBeginOverlap.AddDynamic(this, &ARembrandt::EnterFight);
+	OnActorBeginOverlap.AddDynamic(this, &ARembrandt::TestEvent);
 }
 
 //////////////////////////////////////////////////////////////////////////
