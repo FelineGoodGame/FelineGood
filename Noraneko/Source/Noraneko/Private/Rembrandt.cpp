@@ -2,6 +2,7 @@
 
 #include "Noraneko.h"
 #include "Rembrandt.h"
+#include "Patroller.h"
 
 ARembrandt::ARembrandt(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -38,36 +39,25 @@ ARembrandt::ARembrandt(const FObjectInitializer& ObjectInitializer)
 	GetCharacterMovement()->GroundFriction = 3.f;
 	GetCharacterMovement()->MaxWalkSpeed = 600.f;
 	GetCharacterMovement()->MaxFlySpeed = 600.f;
-
-	// Setup collisions with patrollers
-	
 }
-
-//////////////////////////////////////////////////////////////////////////
-// Input
 
 void ARembrandt::SetupPlayerInputComponent(class UInputComponent* InputComponent)
 {
-	// set up gameplay key bindings
 	InputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
 	InputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
 	InputComponent->BindAxis("MoveRight", this, &ARembrandt::MoveRight);
 
 	InputComponent->BindTouch(IE_Pressed, this, &ARembrandt::TouchStarted);
 	InputComponent->BindTouch(IE_Released, this, &ARembrandt::TouchStopped);
-
-	OnActorBeginOverlap.AddDynamic(this, &ARembrandt::TestEvent);
 }
 
 void ARembrandt::MoveRight(float Value)
 {
-	// add movement in that direction
 	AddMovementInput(FVector(0.f,-10.f,0.f), Value);
 }
 
 void ARembrandt::TouchStarted(const ETouchIndex::Type FingerIndex, const FVector Location)
 {
-	// jump on any touch
 	Jump();
 }
 
@@ -76,3 +66,16 @@ void ARembrandt::TouchStopped(const ETouchIndex::Type FingerIndex, const FVector
 	StopJumping();
 }
 
+void ARembrandt::PostActorCreated()
+{
+	OnActorBeginOverlap.AddDynamic(this, &ARembrandt::HandleBeginOverlap);
+}
+
+void ARembrandt::HandleBeginOverlap(AActor* Other)
+{
+	auto Patroller = Cast<APatroller>(Other);
+	if (Patroller)
+	{
+		FightStarted(Patroller);
+	}
+}

@@ -8,13 +8,18 @@ class NORANEKO_API ARembrandt : public ACharacter
 {
 	GENERATED_BODY()
 
-	/** Side view camera */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
-	class UCameraComponent* SideViewCameraComponent;
+public:
+	ARembrandt(const FObjectInitializer& ObjectInitializer);
 
-	/** Camera boom positioning the camera beside the character */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
-	class USpringArmComponent* CameraBoom;
+	/** Event fired when the player collides with an enemy patroller. */
+	UFUNCTION(BlueprintImplementableEvent, Category = "Rembrandt")
+	void FightStarted(APatroller* Patroller);
+
+	/** Returns SideViewCameraComponent subobject **/
+	FORCEINLINE class UCameraComponent* GetSideViewCameraComponent() const { return SideViewCameraComponent; }
+
+	/** Returns CameraBoom subobject **/
+	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 
 protected:
 
@@ -28,19 +33,27 @@ protected:
 	void TouchStopped(const ETouchIndex::Type FingerIndex, const FVector Location);
 
 	// APawn interface
-	virtual void SetupPlayerInputComponent(class UInputComponent* InputComponent) override;
+	void SetupPlayerInputComponent(class UInputComponent* InputComponent) override;
 	// End of APawn interface
 
+private:
 
-public:
-	ARembrandt(const FObjectInitializer& ObjectInitializer);
+	/** Called after the Actor is spawned and its components are initialized. */
+	void PostActorCreated();
 
-	/** Event fired when the player collides with an enemy patroller. */
-	UFUNCTION(BlueprintImplementableEvent, Category = "Rembrandt")
-	void TestEvent(AActor* OtherActor);
+	/** Called whenever an Actor begins overlaping with Rembrandt. */
+	UFUNCTION()
+	void HandleBeginOverlap(AActor* Other);
 
-	/** Returns SideViewCameraComponent subobject **/
-	FORCEINLINE class UCameraComponent* GetSideViewCameraComponent() const { return SideViewCameraComponent; }
-	/** Returns CameraBoom subobject **/
-	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
+	/** Called whenever an Actor ends overlaping with Rembrandt. */
+	UFUNCTION()
+	void HandleEndOverlap(AActor* Other);
+
+	/** Side view camera */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
+	class UCameraComponent* SideViewCameraComponent;
+
+	/** Camera boom positioning the camera beside the character */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
+	class USpringArmComponent* CameraBoom;
 };
