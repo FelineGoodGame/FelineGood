@@ -46,10 +46,6 @@ void APatroller_Controller::SearchForEnemy()
 			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Enemy lost")));
 			Player = nullptr;
 		}
-		else{
-			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("I see you")));
-
-		}
 	}
 }
 
@@ -76,7 +72,6 @@ void APatroller_Controller::GetNextLocation()
 		//get random location from the list
 		BlackboardComp->SetValueAsVector(TargetLocationID, NodeList[Index]->GetActorLocation());
 		BlackboardComp->SetValueAsObject(TargetKeyID, NodeList[Index]);
-
 	}
 }
  
@@ -92,13 +87,10 @@ void APatroller_Controller::OnSeePawn(APawn* OtherPawn)
 	auto Enemy = Cast<ANoranekoCharacter>(OtherPawn);
 	if (Enemy)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, FString::Printf(TEXT("I fuckin see you")));
-
 		Player = Enemy;
 		BlackboardComp->SetValueAsVector(TargetLocationID, Enemy->GetActorLocation());
 		BlackboardComp->SetValueAsObject(EnemyKeyID, Enemy);
 	}
-
 }
 
 void APatroller_Controller::PostInitializeComponents()
