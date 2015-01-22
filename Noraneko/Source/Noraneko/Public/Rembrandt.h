@@ -1,13 +1,15 @@
 // Copyright 1998-2014 Epic Games, Inc. All Rights Reserved.
 #pragma once
 #include "GameFramework/Character.h"
+#include "HidingPlace.h"
 #include "Rembrandt.generated.h"
 
 UCLASS(config=Game)
-class ARembrandt : public ACharacter
+class NORANEKO_API ARembrandt : public ACharacter
 {
 	GENERATED_BODY()
 
+	bool bCanHide;
 	/** Side view camera */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	class UCameraComponent* SideViewCameraComponent;
@@ -27,6 +29,9 @@ protected:
 	/** Handle touch stop event. */
 	void TouchStopped(const ETouchIndex::Type FingerIndex, const FVector Location);
 
+	/** Called for hiding*/
+	void Hide();
+
 	// APawn interface
 	virtual void SetupPlayerInputComponent(class UInputComponent* InputComponent) override;
 	// End of APawn interface
@@ -39,8 +44,18 @@ public:
 	UFUNCTION(BlueprintImplementableEvent, Category = "Rembrandt")
 	void EnterFight(AActor* OtherActor);
 
+	/**Event fired when the player collides with a hiding place*/
+	UFUNCTION(BlueprintNativeEvent, Category = HidingPlace)
+		void OnFindHidingPlace(AActor* OtherActor);
+
+	/** Event fired when the player exit the overlap of the hidden place*/
+	UFUNCTION(BlueprintNativeEvent, Category = HidingPlace)
+		void OnLeaveHidingPlace(AActor* OtherActor);
+
 	/** Returns SideViewCameraComponent subobject **/
 	FORCEINLINE class UCameraComponent* GetSideViewCameraComponent() const { return SideViewCameraComponent; }
+
 	/** Returns CameraBoom subobject **/
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
+
 };

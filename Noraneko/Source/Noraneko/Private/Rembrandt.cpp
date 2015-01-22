@@ -4,7 +4,7 @@
 #include "Rembrandt.h"
 
 ARembrandt::ARembrandt(const FObjectInitializer& ObjectInitializer)
-	: Super(ObjectInitializer)
+	: Super(ObjectInitializer), bCanHide(false)
 {
 	// Set size for collision capsule
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
@@ -41,6 +41,8 @@ ARembrandt::ARembrandt(const FObjectInitializer& ObjectInitializer)
 
 	// Setup collisions with patrollers
 	OnActorBeginOverlap.AddDynamic(this, &ARembrandt::EnterFight);
+	OnActorBeginOverlap.AddDynamic(this, &ARembrandt::OnFindHidingPlace);
+	OnActorEndOverlap.AddDynamic(this, &ARembrandt::OnLeaveHidingPlace);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -51,10 +53,37 @@ void ARembrandt::SetupPlayerInputComponent(class UInputComponent* InputComponent
 	// set up gameplay key bindings
 	InputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
 	InputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
+
+	InputComponent->BindAction("Hide", IE_Pressed, this, &ARembrandt::Hide);
+
 	InputComponent->BindAxis("MoveRight", this, &ARembrandt::MoveRight);
 
 	InputComponent->BindTouch(IE_Pressed, this, &ARembrandt::TouchStarted);
 	InputComponent->BindTouch(IE_Released, this, &ARembrandt::TouchStopped);
+}
+
+
+
+void ARembrandt::OnFindHidingPlace_Implementation(AActor* OtherActor)
+{
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, FString::Printf(TEXT("you can hide here")));
+	auto HiddingPlace = Cast<AHidingPlace>(OtherActor);
+	if (HiddingPlace)
+	{
+		bCanHide = true;
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, FString::Printf(TEXT("you can hide here")));
+	}
+
+}
+
+void ARembrandt::OnLeaveHidingPlace_Implementation(AActor* OtherActor)
+{
+	auto HiddingPlace = Cast<AHidingPlace>(OtherActor);
+	if (HiddingPlace)
+	{
+		bCanHide = false;
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, FString::Printf(TEXT("left hiding place")));
+	}
 }
 
 void ARembrandt::MoveRight(float Value)
@@ -72,5 +101,14 @@ void ARembrandt::TouchStarted(const ETouchIndex::Type FingerIndex, const FVector
 void ARembrandt::TouchStopped(const ETouchIndex::Type FingerIndex, const FVector Location)
 {
 	StopJumping();
+}
+
+void ARembrandt::Hide()
+{
+	if (bCanHide)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, FString::Printf(TEXT("hidden")));
+	}
+
 }
 
