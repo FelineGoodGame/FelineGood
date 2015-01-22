@@ -6,7 +6,7 @@
 #include "BehaviorTree/BlackboardComponent.h"
 #include "BehaviorTree/BehaviorTreeComponent.h"
 #include "BehaviorTree/BehaviorTree.h"
-#include "NoranekoCharacter.h"
+#include "Rembrandt.h"
 #include "Classes/Perception/PawnSensingComponent.h"
 #include "Patroller_Controller.generated.h"
 
@@ -23,7 +23,7 @@ protected:
 	uint8 TargetKeyID;
 	uint8 TargetLocationID;
 	uint8 EnemyKeyID;
-	ANoranekoCharacter* Player;
+	ARembrandt* Player;
 	uint8 Index;
 
 public:

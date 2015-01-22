@@ -84,7 +84,7 @@ void APatroller_Controller::OnHearNoise(APawn *OtherActor, const FVector &Locati
 
 void APatroller_Controller::OnSeePawn(APawn* OtherPawn)
 {
-	auto Enemy = Cast<ANoranekoCharacter>(OtherPawn);
+	auto Enemy = Cast<ARembrandt>(OtherPawn);
 	if (Enemy)
 	{
 		Player = Enemy;
