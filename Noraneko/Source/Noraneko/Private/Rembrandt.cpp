@@ -3,6 +3,7 @@
 #include "Noraneko.h"
 #include "Rembrandt.h"
 #include "Patroller.h"
+#include "Utils.h"
 
 ARembrandt::ARembrandt(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -76,6 +77,10 @@ void ARembrandt::HandleBeginOverlap(AActor* Other)
 	auto Patroller = Cast<APatroller>(Other);
 	if (Patroller)
 	{
+		LOG << "brah brah" << ' ' << Patroller->GetHumanReadableName() << TEXT(" machin bidule");
 		FightStarted(Patroller);
 	}
 }
+
+void ARembrandt::HandleEndOverlap(AActor* Other)
+{}
