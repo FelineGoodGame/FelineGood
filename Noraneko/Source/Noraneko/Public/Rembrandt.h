@@ -35,6 +35,7 @@ public:
 	UFUNCTION(BlueprintNativeEvent, Category = HidingPlace)
 		void OnLeaveHidingPlace(AActor* OtherActor);
 
+	EState GetState();
 
 protected:
 
@@ -76,6 +77,7 @@ private:
 	UFUNCTION()
 	void HandleEndOverlap(AActor* Other);
 
+	/** Called whenever the player wants to hide*/
 	UFUNCTION()
 	void HandleHidingState();
 	

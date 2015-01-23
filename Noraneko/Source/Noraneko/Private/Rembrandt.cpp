@@ -75,7 +75,7 @@ void ARembrandt::OnLeaveHidingPlace_Implementation(AActor* OtherActor)
 	if (HiddingPlace)
 	{
 		State = EState::Idle;
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, FString::Printf(TEXT("left hiding place")));
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("left hiding place")));
 	}
 }
 
@@ -141,3 +141,8 @@ void ARembrandt::HandleBeginOverlap(AActor* Other)
 
 void ARembrandt::HandleEndOverlap(AActor* Other)
 {}
+
+EState ARembrandt::GetState()
+{
+	return State;
+}

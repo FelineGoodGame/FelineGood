@@ -88,8 +88,12 @@ void APatroller_Controller::OnSeePawn(APawn* OtherPawn)
 	if (Enemy)
 	{
 		Player = Enemy;
-		BlackboardComp->SetValueAsVector(TargetLocationID, Enemy->GetActorLocation());
-		BlackboardComp->SetValueAsObject(EnemyKeyID, Enemy);
+		if (Player->GetState() != EState::Hidden)
+		{
+			BlackboardComp->SetValueAsVector(TargetLocationID, Enemy->GetActorLocation());
+			BlackboardComp->SetValueAsObject(EnemyKeyID, Enemy);
+		}
+		
 	}
 }
 
