@@ -4,19 +4,37 @@
 #include "HidingPlace.h"
 #include "Rembrandt.generated.h"
 
+/**Enum State*/
+UENUM(BlueprintType)		
+enum class EState: uint8
+{
+	Idle = 0,
+	Fighting = 1,
+	Hidden = 2,
+	CanHide = 3,
+};
+
 UCLASS(config=Game)
 class NORANEKO_API ARembrandt : public ACharacter
 {
 	GENERATED_BODY()
+public:
+	ARembrandt(const FObjectInitializer& ObjectInitializer);
 
-	bool bCanHide;
-	/** Side view camera */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
-	class UCameraComponent* SideViewCameraComponent;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Enum)
+		EState State;
+	/** Event fired when the player collides with an enemy patroller. */
+	UFUNCTION(BlueprintImplementableEvent, Category = "Rembrandt")
+	void FightStarted(APatroller* Patroller);
 
-	/** Camera boom positioning the camera beside the character */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
-	class USpringArmComponent* CameraBoom;
+	/**Event fired when the player collides with a hiding place*/
+	UFUNCTION(BlueprintNativeEvent, Category = HidingPlace)
+		void OnFindHidingPlace(AActor* OtherActor);
+
+	/** Event fired when the player exit the overlap of the hidden place*/
+	UFUNCTION(BlueprintNativeEvent, Category = HidingPlace)
+		void OnLeaveHidingPlace(AActor* OtherActor);
+
 
 protected:
 
@@ -32,25 +50,21 @@ protected:
 	/** Called for hiding*/
 	void Hide();
 
+	/**Called for unhiding*/
+	void Unhide();
+
 	// APawn interface
-	virtual void SetupPlayerInputComponent(class UInputComponent* InputComponent) override;
+	void SetupPlayerInputComponent(class UInputComponent* InputComponent) override;
 	// End of APawn interface
 
+private:
 
-public:
-	ARembrandt(const FObjectInitializer& ObjectInitializer);
+	/** Called after the Actor is spawned and its components are initialized. */
+	void PostActorCreated();
 
-	/** Event fired when the player collides with an enemy patroller. */
-	UFUNCTION(BlueprintImplementableEvent, Category = "Rembrandt")
-	void EnterFight(AActor* OtherActor);
-
-	/**Event fired when the player collides with a hiding place*/
-	UFUNCTION(BlueprintNativeEvent, Category = HidingPlace)
-		void OnFindHidingPlace(AActor* OtherActor);
-
-	/** Event fired when the player exit the overlap of the hidden place*/
-	UFUNCTION(BlueprintNativeEvent, Category = HidingPlace)
-		void OnLeaveHidingPlace(AActor* OtherActor);
+	/** Called whenever an Actor begins overlaping with Rembrandt. */
+	UFUNCTION()
+	void HandleBeginOverlap(AActor* Other);
 
 	/** Returns SideViewCameraComponent subobject **/
 	FORCEINLINE class UCameraComponent* GetSideViewCameraComponent() const { return SideViewCameraComponent; }
@@ -58,4 +72,20 @@ public:
 	/** Returns CameraBoom subobject **/
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 
+	/** Called whenever an Actor ends overlaping with Rembrandt. */
+	UFUNCTION()
+	void HandleEndOverlap(AActor* Other);
+
+	UFUNCTION()
+	void HandleHidingState();
+	
+	/** Side view camera */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
+	class UCameraComponent* SideViewCameraComponent;
+
+	/** Camera boom positioning the camera beside the character */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
+	class USpringArmComponent* CameraBoom;
+
+	
 };

@@ -2,9 +2,11 @@
 
 #include "Noraneko.h"
 #include "Rembrandt.h"
+#include "Patroller.h"
+#include "Utils.h"
 
 ARembrandt::ARembrandt(const FObjectInitializer& ObjectInitializer)
-	: Super(ObjectInitializer), bCanHide(false)
+	: Super(ObjectInitializer), State{EState::Idle}
 {
 	// Set size for collision capsule
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
@@ -38,23 +40,15 @@ ARembrandt::ARembrandt(const FObjectInitializer& ObjectInitializer)
 	GetCharacterMovement()->GroundFriction = 3.f;
 	GetCharacterMovement()->MaxWalkSpeed = 600.f;
 	GetCharacterMovement()->MaxFlySpeed = 600.f;
-
-	// Setup collisions with patrollers
-	OnActorBeginOverlap.AddDynamic(this, &ARembrandt::EnterFight);
-	OnActorBeginOverlap.AddDynamic(this, &ARembrandt::OnFindHidingPlace);
-	OnActorEndOverlap.AddDynamic(this, &ARembrandt::OnLeaveHidingPlace);
 }
-
-//////////////////////////////////////////////////////////////////////////
-// Input
 
 void ARembrandt::SetupPlayerInputComponent(class UInputComponent* InputComponent)
 {
-	// set up gameplay key bindings
 	InputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
 	InputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
 
-	InputComponent->BindAction("Hide", IE_Pressed, this, &ARembrandt::Hide);
+	InputComponent->BindAction("Hide", IE_Pressed, this, &ARembrandt::HandleHidingState);
+
 
 	InputComponent->BindAxis("MoveRight", this, &ARembrandt::MoveRight);
 
@@ -66,11 +60,10 @@ void ARembrandt::SetupPlayerInputComponent(class UInputComponent* InputComponent
 
 void ARembrandt::OnFindHidingPlace_Implementation(AActor* OtherActor)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, FString::Printf(TEXT("you can hide here")));
 	auto HiddingPlace = Cast<AHidingPlace>(OtherActor);
 	if (HiddingPlace)
 	{
-		bCanHide = true;
+		State = EState::CanHide;
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, FString::Printf(TEXT("you can hide here")));
 	}
 
@@ -81,20 +74,18 @@ void ARembrandt::OnLeaveHidingPlace_Implementation(AActor* OtherActor)
 	auto HiddingPlace = Cast<AHidingPlace>(OtherActor);
 	if (HiddingPlace)
 	{
-		bCanHide = false;
+		State = EState::Idle;
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, FString::Printf(TEXT("left hiding place")));
 	}
 }
 
 void ARembrandt::MoveRight(float Value)
 {
-	// add movement in that direction
 	AddMovementInput(FVector(0.f,-10.f,0.f), Value);
 }
 
 void ARembrandt::TouchStarted(const ETouchIndex::Type FingerIndex, const FVector Location)
 {
-	// jump on any touch
 	Jump();
 }
 
@@ -105,10 +96,48 @@ void ARembrandt::TouchStopped(const ETouchIndex::Type FingerIndex, const FVector
 
 void ARembrandt::Hide()
 {
-	if (bCanHide)
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, FString::Printf(TEXT("hidden")));
-	}
+
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, FString::Printf(TEXT("hidden")));
+	State = EState::Hidden;
 
 }
 
+void ARembrandt::Unhide()
+{
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("unhidden")));
+	State = EState::CanHide;
+}
+
+void ARembrandt::PostActorCreated()
+{
+	OnActorBeginOverlap.AddDynamic(this, &ARembrandt::HandleBeginOverlap);
+	OnActorBeginOverlap.AddDynamic(this, &ARembrandt::OnFindHidingPlace);
+	OnActorEndOverlap.AddDynamic(this, &ARembrandt::OnLeaveHidingPlace);
+}
+
+void ARembrandt::HandleHidingState()
+{
+	switch (State)
+	{
+	case EState::CanHide:
+		Hide();
+		break; 
+	case EState::Hidden:
+		Unhide();
+	default:
+		break;
+	
+	}
+}
+void ARembrandt::HandleBeginOverlap(AActor* Other)
+{
+	auto Patroller = Cast<APatroller>(Other);
+	if (Patroller)
+	{
+		LOG << "brah brah" << ' ' << Patroller->GetHumanReadableName() << TEXT(" machin bidule");
+		FightStarted(Patroller);
+	}
+}
+
+void ARembrandt::HandleEndOverlap(AActor* Other)
+{}
