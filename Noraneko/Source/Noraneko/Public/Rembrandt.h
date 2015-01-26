@@ -22,18 +22,19 @@ public:
 	ARembrandt(const FObjectInitializer& ObjectInitializer);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Enum)
-		EState State;
+	EState State;
+	
 	/** Event fired when the player collides with an enemy patroller. */
 	UFUNCTION(BlueprintImplementableEvent, Category = "Rembrandt")
 	void FightStarted(APatroller* Patroller);
 
 	/**Event fired when the player collides with a hiding place*/
 	UFUNCTION(BlueprintNativeEvent, Category = HidingPlace)
-		void OnFindHidingPlace(AActor* OtherActor);
+	void OnFindHidingPlace(AActor* OtherActor);
 
 	/** Event fired when the player exit the overlap of the hidden place*/
 	UFUNCTION(BlueprintNativeEvent, Category = HidingPlace)
-		void OnLeaveHidingPlace(AActor* OtherActor);
+	void OnLeaveHidingPlace(AActor* OtherActor);
 
 	EState GetState();
 

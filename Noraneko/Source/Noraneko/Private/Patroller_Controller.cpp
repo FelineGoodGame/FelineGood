@@ -17,6 +17,7 @@ APatroller_Controller::APatroller_Controller(const FObjectInitializer& ObjectIni
 
 }
 
+
 void  APatroller_Controller::Possess(class APawn* InPawn)
 {
 	Super::Possess(InPawn);

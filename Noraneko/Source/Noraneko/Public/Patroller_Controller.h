@@ -13,6 +13,8 @@
 /**
  * 
  */
+
+DECLARE_DELEGATE_OneParam(FRefreshOne, uint8)
 UCLASS()
 class NORANEKO_API APatroller_Controller : public AAIController
 {
@@ -52,6 +54,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = Behavior)
 	void GetNextLocation();
 
+	
+
+	// Events
+	
 	/** function to call onHearNoise Event*/
 	UFUNCTION()
 	void OnHearNoise(APawn *OtherActor, const FVector &Location, float Volume);
@@ -60,7 +66,18 @@ public:
 	UFUNCTION()
 	void OnSeePawn(APawn *OtherPawn);
 
+	UFUNCTION(BlueprintImplementableEvent, Category = Behavior)
+	void EnemyLost();
 
+	UFUNCTION(BlueprintImplementableEvent, Category = Behavior)
+	void EnemyReached();
+
+	UFUNCTION(BlueprintImplementableEvent, Category = Behavior)
+	void WayPointLeft();
+
+	UFUNCTION(BlueprintImplementableEvent, Category = Behavior)
+	void WayPointReached();
+	
 	/**Register the delegate functions*/
 	virtual void PostInitializeComponents();
 
