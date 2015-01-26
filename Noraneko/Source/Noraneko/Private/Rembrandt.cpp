@@ -1,13 +1,16 @@
 // Copyright 1998-2014 Epic Games, Inc. All Rights Reserved.
 
 #include "Noraneko.h"
-#include "NoranekoCharacter.h"
+#include "Rembrandt.h"
+#include "Patroller.h"
+#include "Utils.h"
 
-ANoranekoCharacter::ANoranekoCharacter(const FObjectInitializer& ObjectInitializer)
+ARembrandt::ARembrandt(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
 	// Set size for collision capsule
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
+	GetCapsuleComponent()->bGenerateOverlapEvents = true;
 
 	// Don't rotate when the controller rotates.
 	bUseControllerRotationPitch = false;
@@ -21,6 +24,7 @@ ANoranekoCharacter::ANoranekoCharacter(const FObjectInitializer& ObjectInitializ
 	CameraBoom->TargetArmLength = 500.f;
 	CameraBoom->SocketOffset = FVector(0.f,0.f,75.f);
 	CameraBoom->RelativeRotation = FRotator(0.f,180.f,0.f);
+	CameraBoom->bDoCollisionTest = false;
 
 	// Create a camera and attach to boom
 	SideViewCameraComponent = ObjectInitializer.CreateDefaultSubobject<UCameraComponent>(this, TEXT("SideViewCamera"));
@@ -36,39 +40,47 @@ ANoranekoCharacter::ANoranekoCharacter(const FObjectInitializer& ObjectInitializ
 	GetCharacterMovement()->GroundFriction = 3.f;
 	GetCharacterMovement()->MaxWalkSpeed = 600.f;
 	GetCharacterMovement()->MaxFlySpeed = 600.f;
-
-	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
-	// are set in the derived blueprint asset named MyCharacter (to avoid direct content references in C++)
 }
 
-//////////////////////////////////////////////////////////////////////////
-// Input
-
-void ANoranekoCharacter::SetupPlayerInputComponent(class UInputComponent* InputComponent)
+void ARembrandt::SetupPlayerInputComponent(class UInputComponent* InputComponent)
 {
-	// set up gameplay key bindings
 	InputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
 	InputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
-	InputComponent->BindAxis("MoveRight", this, &ANoranekoCharacter::MoveRight);
+	InputComponent->BindAxis("MoveRight", this, &ARembrandt::MoveRight);
 
-	InputComponent->BindTouch(IE_Pressed, this, &ANoranekoCharacter::TouchStarted);
-	InputComponent->BindTouch(IE_Released, this, &ANoranekoCharacter::TouchStopped);
+	InputComponent->BindTouch(IE_Pressed, this, &ARembrandt::TouchStarted);
+	InputComponent->BindTouch(IE_Released, this, &ARembrandt::TouchStopped);
 }
 
-void ANoranekoCharacter::MoveRight(float Value)
+void ARembrandt::MoveRight(float Value)
 {
-	// add movement in that direction
-	AddMovementInput(FVector(0.f,-1.f,0.f), Value);
+	AddMovementInput(FVector(0.f,-10.f,0.f), Value);
 }
 
-void ANoranekoCharacter::TouchStarted(const ETouchIndex::Type FingerIndex, const FVector Location)
+void ARembrandt::TouchStarted(const ETouchIndex::Type FingerIndex, const FVector Location)
 {
-	// jump on any touch
 	Jump();
 }
 
-void ANoranekoCharacter::TouchStopped(const ETouchIndex::Type FingerIndex, const FVector Location)
+void ARembrandt::TouchStopped(const ETouchIndex::Type FingerIndex, const FVector Location)
 {
 	StopJumping();
 }
 
+void ARembrandt::PostActorCreated()
+{
+	OnActorBeginOverlap.AddDynamic(this, &ARembrandt::HandleBeginOverlap);
+}
+
+void ARembrandt::HandleBeginOverlap(AActor* Other)
+{
+	auto Patroller = Cast<APatroller>(Other);
+	if (Patroller)
+	{
+		LOG << "brah brah" << ' ' << Patroller->GetHumanReadableName() << TEXT(" machin bidule");
+		FightStarted(Patroller);
+	}
+}
+
+void ARembrandt::HandleEndOverlap(AActor* Other)
+{}

@@ -3,6 +3,6 @@
 #ifndef __NORANEKO_H__
 #define __NORANEKO_H__
 
-#include "EngineMinimal.h"
+#include "Engine.h"
 				   
 #endif
